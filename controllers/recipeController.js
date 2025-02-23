@@ -25,10 +25,31 @@ exports.getRecipeById = async (req, res) => {
 
 exports.createRecipe = async (req, res) => {
   try {
+    // Validate required fields
+    const requiredFields = ['recipe_name', 'recipe_description', 'recipe_images', 'ingredients', 'posted_by'];
+    const missingFields = requiredFields.filter(field => !req.body[field]);
+    
+    if (missingFields.length > 0) {
+      return res.status(400).json({ 
+        message: 'Missing required fields', 
+        missingFields 
+      });
+    }
+
+    // Validate arrays
+    if (!Array.isArray(req.body.recipe_images) || !Array.isArray(req.body.ingredients)) {
+      return res.status(400).json({ 
+        message: 'recipe_images and ingredients must be arrays' 
+      });
+    }
+
     console.log('Creating recipe with data:', req.body);
     const recipeId = await Recipe.create(req.body);
     console.log('Recipe created with ID:', recipeId);
-    res.status(201).json({ message: 'Recipe created successfully', recipeId });
+    res.status(201).json({ 
+      message: 'Recipe created successfully', 
+      recipeId 
+    });
   } catch (error) {
     console.error('Error in createRecipe:', error);
     res.status(500).json({ message: 'Error creating recipe', error: error.message });
@@ -37,6 +58,18 @@ exports.createRecipe = async (req, res) => {
 
 exports.updateRecipe = async (req, res) => {
   try {
+    // Validate required fields if they are present in the update
+    const fields = ['recipe_name', 'recipe_description', 'recipe_images', 'ingredients', 'posted_by'];
+    const updateFields = fields.filter(field => req.body[field] !== undefined);
+    
+    // Validate arrays if they are being updated
+    if (req.body.recipe_images && !Array.isArray(req.body.recipe_images)) {
+      return res.status(400).json({ message: 'recipe_images must be an array' });
+    }
+    if (req.body.ingredients && !Array.isArray(req.body.ingredients)) {
+      return res.status(400).json({ message: 'ingredients must be an array' });
+    }
+
     const success = await Recipe.update(req.params.id, req.body);
     if (!success) {
       return res.status(404).json({ message: 'Recipe not found' });
