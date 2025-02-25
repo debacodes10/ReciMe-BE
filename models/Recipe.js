@@ -15,19 +15,20 @@ class Recipe {
     const {
       recipe_name,
       recipe_description,
-      recipe_images,
+      recipe_procedure,
+      recipe_image,
       ingredients,
       posted_by,
-      special_notes
+      special_notes,
+      cook_time
     } = recipeData;
 
-    // Convert arrays to JSON strings if they aren't already
-    const imagesJson = Array.isArray(recipe_images) ? JSON.stringify(recipe_images) : recipe_images;
+    // Convert ingredients to JSON string if it isn't already
     const ingredientsJson = Array.isArray(ingredients) ? JSON.stringify(ingredients) : ingredients;
 
     const [result] = await db.query(
-      'INSERT INTO recipes (recipe_name, recipe_description, recipe_images, ingredients, posted_by, special_notes) VALUES (?, ?, ?, ?, ?, ?)',
-      [recipe_name, recipe_description, imagesJson, ingredientsJson, posted_by, special_notes]
+      'INSERT INTO recipes (recipe_name, recipe_description, recipe_procedure, recipe_image, ingredients, posted_by, special_notes, cook_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [recipe_name, recipe_description, recipe_procedure, recipe_image, ingredientsJson, posted_by, special_notes, cook_time]
     );
     return result.insertId;
   }
@@ -36,19 +37,20 @@ class Recipe {
     const {
       recipe_name,
       recipe_description,
-      recipe_images,
+      recipe_procedure,
+      recipe_image,
       ingredients,
       posted_by,
-      special_notes
+      special_notes,
+      cook_time
     } = recipeData;
 
-    // Convert arrays to JSON strings if they aren't already
-    const imagesJson = Array.isArray(recipe_images) ? JSON.stringify(recipe_images) : recipe_images;
+    // Convert ingredients to JSON string if it isn't already
     const ingredientsJson = Array.isArray(ingredients) ? JSON.stringify(ingredients) : ingredients;
 
     const [result] = await db.query(
-      'UPDATE recipes SET recipe_name = ?, recipe_description = ?, recipe_images = ?, ingredients = ?, posted_by = ?, special_notes = ? WHERE id = ?',
-      [recipe_name, recipe_description, imagesJson, ingredientsJson, posted_by, special_notes, id]
+      'UPDATE recipes SET recipe_name = ?, recipe_description = ?, recipe_procedure = ?, recipe_image = ?, ingredients = ?, posted_by = ?, special_notes = ?, cook_time = ? WHERE id = ?',
+      [recipe_name, recipe_description, recipe_procedure, recipe_image, ingredientsJson, posted_by, special_notes, cook_time, id]
     );
     return result.affectedRows > 0;
   }

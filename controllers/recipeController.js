@@ -26,7 +26,7 @@ exports.getRecipeById = async (req, res) => {
 exports.createRecipe = async (req, res) => {
   try {
     // Validate required fields
-    const requiredFields = ['recipe_name', 'recipe_description', 'recipe_images', 'ingredients', 'posted_by'];
+    const requiredFields = ['recipe_name', 'recipe_description', 'recipe_procedure', 'recipe_image', 'ingredients', 'posted_by', 'cook_time'];
     const missingFields = requiredFields.filter(field => !req.body[field]);
     
     if (missingFields.length > 0) {
@@ -36,10 +36,30 @@ exports.createRecipe = async (req, res) => {
       });
     }
 
-    // Validate arrays
-    if (!Array.isArray(req.body.recipe_images) || !Array.isArray(req.body.ingredients)) {
+    // Validate character limits
+    if (req.body.recipe_description.length > 200) {
+      return res.status(400).json({
+        message: 'recipe_description must not exceed 200 characters'
+      });
+    }
+
+    if (req.body.recipe_procedure.length > 1200) {
+      return res.status(400).json({
+        message: 'recipe_procedure must not exceed 1200 characters'
+      });
+    }
+
+    // Validate ingredients is an array
+    if (!Array.isArray(req.body.ingredients)) {
       return res.status(400).json({ 
-        message: 'recipe_images and ingredients must be arrays' 
+        message: 'ingredients must be an array' 
+      });
+    }
+
+    // Validate cook_time is a positive number
+    if (typeof req.body.cook_time !== 'number' || req.body.cook_time <= 0) {
+      return res.status(400).json({
+        message: 'cook_time must be a positive number'
       });
     }
 
@@ -58,16 +78,27 @@ exports.createRecipe = async (req, res) => {
 
 exports.updateRecipe = async (req, res) => {
   try {
-    // Validate required fields if they are present in the update
-    const fields = ['recipe_name', 'recipe_description', 'recipe_images', 'ingredients', 'posted_by'];
-    const updateFields = fields.filter(field => req.body[field] !== undefined);
-    
-    // Validate arrays if they are being updated
-    if (req.body.recipe_images && !Array.isArray(req.body.recipe_images)) {
-      return res.status(400).json({ message: 'recipe_images must be an array' });
+    // Validate character limits if fields are present
+    if (req.body.recipe_description && req.body.recipe_description.length > 200) {
+      return res.status(400).json({
+        message: 'recipe_description must not exceed 200 characters'
+      });
     }
-    if (req.body.ingredients && !Array.isArray(req.body.ingredients)) {
+
+    if (req.body.recipe_procedure && req.body.recipe_procedure.length > 1200) {
+      return res.status(400).json({
+        message: 'recipe_procedure must not exceed 1200 characters'
+      });
+    }
+
+    // Validate ingredients if present
+    if (req.body.ingredients !== undefined && !Array.isArray(req.body.ingredients)) {
       return res.status(400).json({ message: 'ingredients must be an array' });
+    }
+
+    // Validate cook_time if present
+    if (req.body.cook_time !== undefined && (typeof req.body.cook_time !== 'number' || req.body.cook_time <= 0)) {
+      return res.status(400).json({ message: 'cook_time must be a positive number' });
     }
 
     const success = await Recipe.update(req.params.id, req.body);
