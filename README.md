@@ -134,3 +134,5 @@ curl -X POST http://localhost:3000/api/reviews/1/add \
 - `negative_reviews`: INT
 - `created_at`: TIMESTAMP
 - `updated_at`: TIMESTAMP
+
+-- end of README --
